@@ -5,8 +5,7 @@ pub struct AlienPlugin;
 impl Plugin for AlienPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, (spawn_alien, alien_movement))
-            .init_resource::<AlienSpawnTimer>()
-            .add_systems(Update, timer_spawn_alien);
+            .init_resource::<AlienSpawnTimer>();
     }
 }
 
@@ -66,5 +65,3 @@ fn alien_movement(mut alien: Query<&mut Transform, With<AlienMarker>>, time: Res
         transform.translation.y -= ALIEN_SPEED * time.delta_seconds();
     }
 }
-
-fn timer_spawn_alien(mut timer: ResMut<AlienSpawnTimer>, time: Res<Time>) {}

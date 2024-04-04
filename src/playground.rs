@@ -1,10 +1,11 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle, window::PrimaryWindow};
+use bevy::{app::AppExit, prelude::*, window::PrimaryWindow};
 
-pub struct ScreenPlugin;
+pub struct SettingsPlugin;
 
-impl Plugin for ScreenPlugin {
+impl Plugin for SettingsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_camera);
+        app.add_systems(Startup, setup_camera)
+            .add_systems(Update, exit_game);
     }
 }
 
@@ -15,16 +16,9 @@ fn setup_camera(mut commands: Commands, window_query: Query<&Window, With<Primar
         ..Default::default()
     });
 }
-//
-// fn ship_boundary_line(
-//     mut commands: Commands,
-//     mut meshes: ResMut<Assets<Mesh>>,
-//     mut materials: ResMut<Assets<ColorMaterial>>,
-// ) {
-//     commands.spawn(MaterialMesh2dBundle {
-//         mesh: meshes.add(Rectangle::default()).into(),
-//         transform: Transform::from_xyz(600., 0., 0.),
-//         material: materials.add(Color::PURPLE),
-//         ..Default::default()
-//     });
-// }
+
+fn exit_game(mut exit_game: EventWriter<AppExit>, keyboard: Res<ButtonInput<KeyCode>>) {
+    if keyboard.just_pressed(KeyCode::Escape) {
+        exit_game.send(AppExit);
+    }
+}
