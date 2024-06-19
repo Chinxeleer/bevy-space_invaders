@@ -14,7 +14,7 @@ const ALIEN_SPAWN_TIME: f32 = 1.0;
 const ALIEN_SIZE: f32 = 50.0;
 
 #[derive(Component)]
-struct AlienMarker;
+pub struct AlienMarker;
 
 #[derive(Resource)]
 struct AlienSpawnTimer {
