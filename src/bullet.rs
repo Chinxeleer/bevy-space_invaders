@@ -1,5 +1,4 @@
-use crate::resources::BulletCache;
-
+use crate::resources::{BulletCache, BulletCacheSpawnTimer, Score};
 use super::aliens::AlienMarker;
 use super::ship_plugin as Ship;
 use bevy::{prelude::*, window::PrimaryWindow};
@@ -25,16 +24,19 @@ const BULLET_SPEED: f32 = 400.0;
 #[derive(Component)]
 struct Bullet;
 
+// function to spawn bullets and keep track of the bullets in the cache.
 fn spawn_bullet(
     mut bullet_cache: ResMut<BulletCache>,
     mut commands: Commands,
+    time: ResMut<Time>,
+    mut spawn_timer: ResMut<BulletCacheSpawnTimer>,
     query: Query<&Transform, With<Ship::SpaceShip>>,
     asset_server: Res<AssetServer>,
     keyboard: Res<ButtonInput<KeyCode>>,
 ) {
     let space_ship_position = query.get_single().unwrap().translation;
 
-    if (bullet_cache.cache <= (bullet_cache.total_bullets) as i32)
+    if (bullet_cache.cache < (bullet_cache.total_bullets) as i32)
         && keyboard.just_pressed(KeyCode::Space)
     {
         commands.spawn((
@@ -50,12 +52,18 @@ fn spawn_bullet(
             },
             Bullet,
         ));
-
         bullet_cache.cache += 1;
     }
 
-    if bullet_cache.cache > 5 {
+    // checking if we still have bullets in the cash. If not, we start the timer.
+    if bullet_cache.cache == bullet_cache.total_bullets as i32 {
+        spawn_timer.timer.tick(time.delta());
+    }
+
+    // The time has started ticking. Now we check if timer has reached the end.
+    if spawn_timer.timer.finished() {
         bullet_cache.cache = 0;
+        spawn_timer.timer.reset();
     }
 
     println!("{}", bullet_cache.cache);
@@ -84,7 +92,8 @@ fn bullet_movement_system(mut query: Query<&mut Transform, With<Bullet>>, time: 
 }
 
 fn collision_with_alien(
-    mut bullet_cache: ResMut<BulletCache>,
+    // mut bullet_cache: ResMut<BulletCache>,
+    mut score: ResMut<Score>,
     mut commands: Commands,
     bullet_query: Query<(Entity, &Transform), With<Bullet>>,
     alien_query: Query<(Entity, &Transform), With<AlienMarker>>,
@@ -99,7 +108,8 @@ fn collision_with_alien(
             if distance <= 50.0 {
                 commands.entity(alien_entity).despawn();
                 commands.entity(bullet_entity).despawn();
-                bullet_cache.cache -= 1
+                score.score += 1;
+                // bullet_cache.cache -= 1
             }
         }
     }

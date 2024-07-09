@@ -29,29 +29,69 @@ impl Default for AlienSpawnTimer {
     }
 }
 
+// fn spawn_alien(
+//     mut timer: ResMut<AlienSpawnTimer>,
+//     mut commands: Commands,
+//     assert_server: Res<AssetServer>,
+//     window_query: Query<&Window, With<PrimaryWindow>>,
+//     time: Res<Time>,
+// ) {
+//     let window = window_query.get_single().unwrap();
+//
+//     timer.time.tick(time.delta());
+//     let random = rand::thread_rng().gen_range(0..=5);
+//     if timer.time.finished() {
+//         for _ in 0..random {
+//             let random_x = rand::random::<f32>() * window.width() + 2.0 * ALIEN_SIZE;
+//
+//             if random_x > window.width() - ALIEN_SIZE {
+//                 continue;
+//             }
+//             commands.spawn((
+//                 SpriteBundle {
+//                     transform: Transform::from_xyz(random_x, window.height(), 0.0)
+//                         .with_scale(Vec3::splat(0.5)),
+//                     texture: assert_server.load("sprites/aliens/shipBeige_manned.png"),
+//                     ..Default::default()
+//                 },
+//                 AlienMarker,
+//             ));
+//         }
+//     }
+// }
+//
+//
+//
 fn spawn_alien(
     mut timer: ResMut<AlienSpawnTimer>,
     mut commands: Commands,
-    assert_server: Res<AssetServer>,
+    asset_server: Res<AssetServer>,
     window_query: Query<&Window, With<PrimaryWindow>>,
     time: Res<Time>,
 ) {
     let window = window_query.get_single().unwrap();
 
     timer.time.tick(time.delta());
-    let random = rand::thread_rng().gen_range(0..=5);
     if timer.time.finished() {
-        for _ in 0..random {
-            let random_x = rand::random::<f32>() * window.width() + 2.0 * ALIEN_SIZE;
+        let mut rng = rand::thread_rng();
+        let random_count = rng.gen_range(1..=5);
 
-            if random_x > window.width() - ALIEN_SIZE {
-                continue;
-            }
+        // Calculate the step for even distribution
+        let step = window.width() / (random_count + 1) as f32;
+
+        // Generate positions without overlap
+        let mut positions = Vec::new();
+        for i in 1..=random_count {
+            let x_pos = step * i as f32;
+            positions.push(x_pos);
+        }
+
+        for x in positions {
             commands.spawn((
                 SpriteBundle {
-                    transform: Transform::from_xyz(random_x, window.height(), 0.0)
+                    transform: Transform::from_xyz(x, window.height(), 0.0)
                         .with_scale(Vec3::splat(0.5)),
-                    texture: assert_server.load("sprites/aliens/shipBeige_manned.png"),
+                    texture: asset_server.load("sprites/aliens/shipBeige_manned.png"),
                     ..Default::default()
                 },
                 AlienMarker,
