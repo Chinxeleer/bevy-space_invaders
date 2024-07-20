@@ -50,7 +50,7 @@ fn setup_scoreboard(
                 TextSection::new("Score :", text_style.clone()),
                 TextSection::from_style(text_style.clone()),
             ]),
-            transform: Transform::from_xyz(120.0, window.height() - 40.00, 0.0),
+            transform: Transform::from_xyz(150.0, window.height() - 40.00, 0.0),
             ..Default::default()
         },
         ScoreText,
